@@ -1,0 +1,75 @@
+default
+----------------
+1.calculator.js:
+----------------
+const add=(a,b)=>{
+return a+b;
+};
+module.exports=add;
+---------
+index.js:
+---------
+const add=require("./calculator");
+console.log(add(6,3));
+
+node index.js
+
+named
+----------------
+2.calculator.js:
+----------------
+const add = (a, b) => {
+  return a + b;
+};
+const sub = (a, b) => {
+  return a - b;
+};
+exports.add = add;
+exports.sub = sub;
+---------
+index.js:
+---------
+const calculator = require("./calculator");
+const {add,sub}=calculator
+console.log(add(6, 3));
+console.log(sub(6, 3));
+
+node index.js
+
+ES6 default
+--------------
+3.calculator.mjs:
+--------------
+const add = (a, b) => {
+  return a + b;
+};
+const sub = (a, b) => {
+  return a - b;
+};
+export default add;
+---------
+index.mjs:
+---------
+import add from "./calculator.mjs";
+console.log(add(6, 3));
+
+node index.mjs
+
+ES6 named
+--------------
+4.calculator.mjs:
+--------------
+export const add = (a, b) => {
+  return a + b;
+};
+export const sub = (a, b) => {
+  return a - b;
+};
+---------
+index.mjs:
+---------
+import { add, sub } from "./calculator.mjs";
+console.log(sub(6, 3));
+console.log(add(6, 3));
+
+node index.mjs

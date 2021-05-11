@@ -1,0 +1,32 @@
+const express=require("express");
+const app=express();
+const sqlite3=require("sqlite3");
+const {open}=require("sqlite");
+const path=require("path");
+app.use(express.json());
+let db=null;
+
+const func=async()=>{
+try{
+db=await open({
+      filename:path.join(__dirname,"todoApplication.db"),
+      driver:sqlite3.Database
+});
+app.listen(3000,()=>{
+console.log("Server Started");
+});
+}catch(e){
+console.log(e.message);
+}
+};
+func();
+
+app.get("/todos/",async(request,response)=>{
+   const {status="",priority="",search_q=""}=request.query;
+   const query=`select * from todo where todo like '%${search_q}%' and priority='${priority}' and status='${status}';`;
+   const result=await db.all(query);
+   response.send(result);
+});
+
+
+

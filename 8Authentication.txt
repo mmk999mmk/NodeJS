@@ -1,0 +1,63 @@
+npm install bcrypt --save
+
+const hashedPassword = await bcrypt.hash(password, 10);
+
+const isPasswordMatched=await bcrypt.compare(password,dbUser.password);
+
+//register user
+app.post("/users/", async (request, response) => {
+  const { username, name, password, gender, location } = request.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const selectUserQuery = `
+  SELECT 
+    * 
+  FROM 
+    user 
+  WHERE 
+    username = '${username}'`;
+  const dbUser = await db.get(selectUserQuery);
+  if (dbUser === undefined) {
+    //create user in user table
+    const createUserQuery = `
+  INSERT INTO
+    user (username, name, password, gender, location)
+  VALUES
+    (
+      '${username}',
+      '${name}',
+      '${hashedPassword}',
+      '${gender}',
+      '${location}'  
+    );`;
+    await db.run(createUserQuery);
+    response.send("User Created Successfully");
+  } else {
+    //invalid user name as response
+    response.status(400);
+    response.send("User Already Exists");
+  }
+});
+//login api
+app.post("/login/", async (request, response) => {
+  const { username, password } = request.body;
+  const selectUserQuery = `
+  SELECT 
+    * 
+  FROM 
+    user 
+  WHERE 
+    username = '${username}'`;
+  const dbUser = await db.get(selectUserQuery);
+  if (dbUser === undefined) {
+    response.status(400);
+    response.send("User doesn't exist");
+  } else {
+    const isPasswordMatched = await bcrypt.compare(password, dbUser.password);
+    if (isPasswordMatched) {
+      response.send("You are logged In");
+    } else {
+      response.status(401);
+      response.send("Username or password doesnt match");
+    }
+  }
+});

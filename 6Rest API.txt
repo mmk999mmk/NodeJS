@@ -1,0 +1,35 @@
+path vs query parameter:
+
+q parameters are used to sort/filter resources.
+
+p parameters are used to identify specific resource(s).
+
+//filtering Books API
+// Get Books API
+app.get("/books/", async (request, response) => {
+  const { offset, limit, search_q = "", order_by, order } = request.query;
+  const getBooksQuery = `
+    SELECT
+      *
+    FROM
+     book
+    WHERE
+     title LIKE '%${search_q}%'
+    ORDER BY ${order_by} ${order}
+    LIMIT ${limit} OFFSET ${offset};`;
+  const booksArray = await db.all(getBooksQuery);
+  response.send(booksArray);
+});
+
+
+GET http://localhost:3000/books/?offset=2&limit=3&search_q=potter&order_by=price&order=DESC
+
+Rest api:
+
+everything has a unique id
+methods should be there and it should be used accordingly.
+using of json methods
+scalability and reliability
+
+to stop process in all the terminals:
+lsof -i :3000

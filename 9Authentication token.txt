@@ -1,0 +1,70 @@
+JWT - Json Web Token
+
+npm install jsonwebtoken --save
+
+JWTToken=jwt.sign(payload,Token);
+
+jwt.verify(request.headers["authorization"].split(" ")[1],Token,(err,use)=>{});
+
+
+
+// User Login API
+app.post("/login/", async (request, response) => {
+  const { username, password } = request.body;
+  const selectUserQuery = `
+    SELECT
+      *
+    FROM
+      user
+    WHERE 
+      username = '${username}';`;
+  const dbUser = await db.get(selectUserQuery);
+
+  if (dbUser === undefined) {
+    response.status(400);
+    response.send("Invalid User");
+  } else {
+    const isPasswordMatched = await bcrypt.compare(password, dbUser.password);
+    if (isPasswordMatched === true) {
+      const payload = { username: username };
+      const jwtToken = jwt.sign(payload, "giayfiiuFFIvilufIFYFifI");
+      response.send({ jwtToken });
+    } else {
+      response.status(400);
+      response.send("Invalid Password");
+    }
+  }
+});
+
+
+// Get Books API
+app.get("/books/", async (request, response) => {
+  const authHeader = request.headers["authorization"];
+  let jwtToken;
+  if (authHeader !== undefined) {
+    jwtToken = authHeader.split(" ")[1];
+  }
+  if (authHeader === undefined) {
+    response.status(401);
+    response.send("Invalid JWT Token");
+  } else {
+    jwt.verify(jwtToken, "giayfiiuFFIvilufIFYFifI", async (error, user) => {
+      if (error) {
+        response.status(401);
+        response.send("Invalid JWT Token");
+      } else {
+        const getBooksQuery = `
+  SELECT
+    *
+  FROM
+    book
+  ORDER BY
+    book_id;`;
+        const booksArray = await db.all(getBooksQuery);
+        response.send(booksArray);
+      }
+    });
+  }
+});
+
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJhaHVsMTIzIiwiaWF0IjoxNjE4OTg4MjE1fQ.RV73P9CJ2Km0yslTtEJyVdrDc4fATjhpl9f2ipE-7oI
